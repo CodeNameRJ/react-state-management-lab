@@ -6,6 +6,7 @@ const App = () => {
 
   const [team, setTeam] = useState([]);
   const [money, setMoney] = useState(100);
+  const [errorMessage, setErrorMessage] = useState('');
   const [zombieFighters, setZombieFighters] = useState(
     [
       {
@@ -92,6 +93,10 @@ const App = () => {
 
   )
 
+  const totalStrength = team.reduce((sum, member) => sum + member.strength, 0);
+  const totalAgility = team.reduce((sum, member) => sum + member.agility, 0);
+
+
 
   // console.log("Rendering Component...");
   // console.log("Current Team:", team);
@@ -102,9 +107,11 @@ const App = () => {
     console.log(`Attempting to add: ${fighter.name}`)
 
     if (money < fighter.price) {
-      console.log("Not enough money to buy this fighter");
+      setErrorMessage("Not enough money to buy this fighter");
       return;
     }
+
+    setErrorMessage('')
 
     setTeam((prevTeam) => {
       const updatedTeam = [...prevTeam, fighter];
@@ -116,13 +123,13 @@ const App = () => {
 
     setZombieFighters((prevFighters) => {
       const updatedFighters = prevFighters.filter((f) => f.id !== fighter.id);
-      console.log("Updated Zombie Fighters List:", updatedFighters)
+      console.log("Updated Zombie Fighters List:", updatedFighters);
       return updatedFighters;
     })
 
     setMoney((prevMoney) => {
       const updatedMoney = prevMoney - fighter.price;
-      console.log(`New Money Balance: ${updatedMoney}`)
+      console.log(`New Money Balance: ${updatedMoney}`);
       return updatedMoney;
     })
 
@@ -131,11 +138,31 @@ const App = () => {
 
 
 
+  // remove Fighter
+  const handleRemoveFighter = (fighter) => {
+    console.log(`Attempting to remove ${fighter.name}`);
+
+    setTeam((prevTeam) => {
+      const updatedTeam = prevTeam.filter((f) => f.id !== fighter.id);
+      console.log('updated team after removal:', updatedTeam);
+      return updatedTeam
+    })
+
+    setZombieFighters((prevFighters) => {
+      const updatedFighters = [...prevFighters, fighter];
+      console.log("Updated Zombie Fighters List:", updatedFighters);
+      return updatedFighters;
+    });
+
+    setMoney((prevMoney) => {
+      const updatedMoney = prevMoney + fighter.price;
+      console.log(`New Money Balance after refund: ${updatedMoney}`);
+      return updatedMoney;
+    });
+  };
 
 
 
-
-  
 
 
 
@@ -143,7 +170,7 @@ const App = () => {
   return (
     <>
 
-    <div>
+    <div className='zombie-fighters-section'>
       <h1>Zombie Apocalypse Team Builder</h1>
       <h2>Money: {money}</h2>
 
@@ -164,35 +191,50 @@ const App = () => {
           </li>
         ))}
       </ul>
+    </div>
 
       {/* Team Membeers */}
-      <h2>Team Members</h2>
-      {console.log("Rendering Team:", team)}
-
-      <ul>
-        {team.map((member) => (
-          <li key={member.id}>
-            <img src={member.img} alt={member.img} />
-            <h3>{member.name}</h3>
-            <p>Price: {member.price}</p>
-            <p>Strength {member.strength}</p>
-            <p>Agility: {member.agility}</p>
-
-            <button onClick={() => console.log(`Clicked Remove for ${member.name}`)}>Remove</button>
-          </li>
-        ))}
-      </ul>
+      {/* <h2>Team Members</h2> */}
+      {/* {console.log("Rendering Team:", team)} */}
 
 
+      <div className='team-members-section'>
+        <h2>Your Team</h2>
+        {team.length === 0 ? (
+          <p><b>Pick some team members!</b></p>
+          ) :(
+          <ul>
+            {team.map((member) => (
+            <li key={member.id}>
+              <img src={member.img} alt={member.img} />
+              <h3>{member.name}</h3>
+              <p>Price: {member.price}</p>
+              <p>Strength {member.strength}</p>
+              <p>Agility: {member.agility}</p>
+
+              <button onClick={() => handleRemoveFighter(member)}>Remove</button>
+             </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
 
 
+      {/* Display total stats */}
+
+      <div>
+        <h2>Team Stats</h2>
+        <p><strong>Total Strength:</strong> {totalStrength}</p>
+        <p><strong>Total Agility:</strong> {totalAgility}</p>
+      </div>
+
+      <div className="error-message">
+        {errorMessage && <p>{errorMessage}</p>}
+      </div>
 
 
 
-
-
-    </div>
 
     </>
 
